@@ -52,3 +52,19 @@ app.post('/login', function(req,resp) {
   connections++;
   resp.send({ success: true, name: _name, id: connections });
 });
+
+
+// Socket events
+io.on('connection', function(socket) {
+  var counter = 0;
+  console.log('User has connected');
+
+  socket.on('disconnect', function() {
+    console.log('User has disconnected');
+  });
+
+  socket.on('user:joined', function(user) {
+    var message = user.name + ' joined the room';
+    io.emit('user:joined', { message: message, time: moment(), expires: moment().add(10) });
+  });
+});
