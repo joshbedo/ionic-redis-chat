@@ -7,7 +7,7 @@ var io         = require('socket.io').listen(server);
 var Redis      = require('ioredis');
 var moment     = require('moment');
 
-var _connections = 0;
+var connections = 0;
 var _channelWatchList = [];
 
 var PORT = 8001;
@@ -37,4 +37,18 @@ server.listen(PORT, function() {
   console.log('App is now listening on port: ' + PORT);
 });
 
-redisClient.set('user:josh', moment());
+// Routes -- probably seperate into a module
+app.post('/login', function(req,resp) {
+  var _name = req.param('name');
+  var _password = req.param('password'); // I should use encypt later.
+
+  if (!_name || !_password) return;
+  console.log('Password attempt by: ' + _name + ' at: ' + moment());
+
+  if (_password == 'password') {
+    var userKey = 'user:' + _name;
+    redisClient.set(userKey, moment());
+  }
+  connections++;
+  resp.send({ success: true, name: _name, id: connections });
+});
