@@ -10,7 +10,7 @@ var moment     = require('moment');
 var connections = 0;
 var _channelWatchList = [];
 
-var PORT = 8001;
+var PORT = 1337;
 var REDIS_PORT = 6379;
 var REDIS_HOST = 'localhost';
 
@@ -33,6 +33,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(express.static(__dirname + '/client/www'));
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+      res.send(200);
+    }
+    else {
+      next();
+    }
+};
+app.use(allowCrossDomain);
+
 server.listen(PORT, function() {
   console.log('App is now listening on port: ' + PORT);
 });
@@ -48,9 +63,11 @@ app.post('/login', function(req,resp) {
   if (_password == 'password') {
     var userKey = 'user:' + _name;
     redisClient.set(userKey, moment());
+    connections++;
+    resp.send({ success: true, name: _name, id: connections });
+  } else {
+    resp.send({ success: false, error: 'wrong username and password' }, 422);
   }
-  connections++;
-  resp.send({ success: true, name: _name, id: connections });
 });
 
 
