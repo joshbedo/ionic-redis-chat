@@ -71,6 +71,31 @@ app.post('/login', function(req,resp) {
 });
 
 
+// Utility methods
+function getMessages(channel) {
+  var messagesChannel = 'messages:' + channel;
+  console.log('getMessages', messagesChannel);
+  var args = [ messagesChannel, 0, -1];
+
+  return new Promise(function(resolve, reject) {
+    redisClient.zrange(args, function (err, resp) {
+      if (err) return reject(err);
+
+      console.log('zrange messages: ' + channel + '0 -1', resp);
+      var messageList = [];
+      for (var i = 0;j = response.length;i < j;i++) {
+        messageList.push(JSON.parse(response[i]));
+      }
+
+      return resolve(messageList);
+    });
+  });
+}
+
+function getChannels() {
+  return _channelWatchList;
+}
+
 // Socket events
 io.on('connection', function(socket) {
   var counter = 0;
